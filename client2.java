@@ -5,7 +5,7 @@ import java.nio.file.Files;
 
 import java.util.*;
 
-public class client2 {
+public class Client2 {
 	Socket requestSocket; // socket connect to the server
 	ObjectOutputStream out; // stream write to the socket
 	ObjectInputStream in; // stream read from the socket
@@ -17,7 +17,7 @@ public class client2 {
 	public static int file_downloaded = 0;
 	public static int file_uploaded = 0;
 
-	client2() {
+	Client2() {
 	}
 
 	void mergeFiles(String Filename, int count) throws IOException {
@@ -126,21 +126,21 @@ public class client2 {
 	public static void main(String[] args) {
 		int sPort = Integer.parseInt(args[1]);
 
-		client2 client1 = new client2();
+		Client2 client = new Client2();
 		String folder = args[0];
-		client1.DownloadFromServer(folder, sPort);
+		client.DownloadFromServer(folder, sPort);
 
 		ServerSocket sSocket = null;
 		boolean check1 = true;
 		boolean check2 = true;
 
-		File Filename = new File(client1.Sub_FileName);
+		File Filename = new File(client.Sub_FileName);
 
-		DownloadPeer thrd = new DownloadPeer(client1.ports[1],
-				client2.count_files, Filename, check_list);
+		DownloadPeer thrd = new DownloadPeer(client.ports[1],
+				Client2.count_files, Filename, check_list);
 		thrd.start();
-		UploadPeer thrd1 = new UploadPeer(client1.ports[2],
-				client2.count_files, Filename, check_list);
+		UploadPeer thrd1 = new UploadPeer(client.ports[2],
+				Client2.count_files, Filename, check_list);
 
 		try {
 			thrd.join();
@@ -151,8 +151,8 @@ public class client2 {
 
 		try {
 			System.out.println("All Chunks Received ! Starting to merge");
-			client1.mergeFiles(Filename.toString(), client2.count_files);
-			client1.DeleteFiles(Filename.toString(), client2.count_files);
+			client.mergeFiles(Filename.toString(), Client2.count_files);
+			client.DeleteFiles(Filename.toString(), Client2.count_files);
 			System.out.println("File Recieved Completely");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -198,10 +198,10 @@ class UploadPeer extends Thread {
 		int a = 0;
 		int file_uploaded = 0;
 
-		while (Math.ceil(client2.count_files / 5) + client2.file_uploaded != client2.count_files) {
+		while (Math.ceil(Client2.count_files / 5) + Client2.file_uploaded != Client2.count_files) {
 
 			try {
-				a = client2.file_downloaded;
+				a = Client2.file_downloaded;
 				sSocket = new ServerSocket(port, 10);
 				Socket csocket = sSocket.accept();
 				out = new ObjectOutputStream(csocket.getOutputStream());
@@ -212,7 +212,7 @@ class UploadPeer extends Thread {
 				boolean[] peerchecklist = (boolean[]) in.readObject();
 				System.out.println("Receiving Chunk List from Peer");
 				while (i < peerchecklist.length) {
-					if (peerchecklist[i] != client2.check_list[i]
+					if (peerchecklist[i] != Client2.check_list[i]
 							&& !peerchecklist[i])
 						change++;
 					i++;
@@ -235,7 +235,7 @@ class UploadPeer extends Thread {
 				while (i < peerchecklist.length)
 
 				{
-					if (peerchecklist[i] != client2.check_list[i]
+					if (peerchecklist[i] != Client2.check_list[i]
 							&& !peerchecklist[i]) {
 						System.out.print(" " + i);
 						if (start_subfile == -1)
@@ -266,7 +266,7 @@ class UploadPeer extends Thread {
 					System.out.println("Done.");
 					start_subfile++;
 
-					client2.file_uploaded++;
+					Client2.file_uploaded++;
 
 					fis.close();
 					bis.close();
@@ -299,13 +299,13 @@ class UploadPeer extends Thread {
 				try {
 
 					Thread.sleep(5000);
-					a = client2.file_downloaded;
+					a = Client2.file_downloaded;
 				} catch (InterruptedException e) {
 
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} while (a == client2.file_uploaded);
+			} while (a == Client2.file_uploaded);
 
 		}
 	}
@@ -341,7 +341,7 @@ class DownloadPeer extends Thread {
 
 		// create a socket to connect to the server
 
-		while (client2.file_downloaded != client2.count_files) {
+		while (Client2.file_downloaded != Client2.count_files) {
 			try {
 				while (true) {
 
@@ -375,7 +375,7 @@ class DownloadPeer extends Thread {
 					// continue;
 				}
 				System.out.println("Sending Chunk List to Peer");
-				out.writeObject(client2.check_list);
+				out.writeObject(Client2.check_list);
 				int count_files = in.readInt();
 				int end_index = in.readInt();
 				int start_index = in.readInt();
@@ -402,9 +402,9 @@ class DownloadPeer extends Thread {
 					fos.close();
 					System.out.println(" chunk " + i + " downloaded ("
 							+ current + " bytes read)");
-					client2.check_list[i] = true;
+					Client2.check_list[i] = true;
 
-					client2.file_downloaded++;
+					Client2.file_downloaded++;
 
 					i++;
 					out.flush();
